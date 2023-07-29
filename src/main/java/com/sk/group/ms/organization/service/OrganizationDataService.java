@@ -6,6 +6,11 @@ package com.sk.group.ms.organization.service;
 
 import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.shared.entity.OrganizationData;
+import com.sk.group.shared.implementation.exception.GroupException;
+import com.sk.group.shared.implementation.response.organization.DeleteOrganizationResponse;
+import com.sk.group.shared.implementation.response.organization.GetAllOrganizationResponse;
+import com.sk.group.shared.implementation.response.organization.GetOrganizationResponse;
+import com.sk.group.shared.implementation.response.organization.SaveOrganizationResponse;
 
 /**
 @author - Shreyans Khobare
@@ -17,25 +22,26 @@ public interface OrganizationDataService {
 	 * @param request
 	 * @return
 	 */
-	public OrganizationData addOrganizationData(OrganizationDataRequest request);
+	public SaveOrganizationResponse addOrganizationData(OrganizationDataRequest request);
 	
 	/**
 	 * In this method, we fetch values from ORGANIZATION_DATA table based on Primary Keys
 	 * @param request
 	 * @return
 	 */
-	public OrganizationData getOrganizationData(OrganizationDataRequest request);
+	public GetOrganizationResponse getOrganizationData(OrganizationDataRequest request) throws GroupException;
 	
 	/**
 	 * In this method, we delete values from ORGANIZATION_DATA table based on Primary Keys
 	 * @param request
+	 * @return 
 	 */
-	public void deleteOrganizationData(OrganizationDataRequest request);
+	public DeleteOrganizationResponse deleteOrganizationData(OrganizationDataRequest request);
 	
 	/**
 	 * In this method, we fetch all entries from ORGANIZATION_DATA table
 	 * @return
 	 */
-	public Iterable<OrganizationData> getAllOrganizations();
+	public GetAllOrganizationResponse getAllOrganizations();
 	
 }

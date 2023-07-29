@@ -5,7 +5,6 @@ Proof of concept for Code Template
 package com.sk.group.ms.organization.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.ms.organization.service.OrganizationDataService;
 import com.sk.group.shared.entity.OrganizationData;
+import com.sk.group.shared.implementation.exception.GroupException;
+import com.sk.group.shared.implementation.response.organization.DeleteOrganizationResponse;
+import com.sk.group.shared.implementation.response.organization.GetAllOrganizationResponse;
+import com.sk.group.shared.implementation.response.organization.GetOrganizationResponse;
+import com.sk.group.shared.implementation.response.organization.SaveOrganizationResponse;
 
 /**
  * @author - Shreyans Khobare
@@ -28,47 +32,49 @@ import com.sk.group.shared.entity.OrganizationData;
 @RestController
 @RequestMapping("api/organization-service")
 public class OrganizationServiceController {
-	
-	@Value("${organization.delete.success.message}")
-	private String deletedSuccessMessage; 
 
 	@Autowired
 	private OrganizationDataService organizationDataService;
-	
+
 	@PostMapping(value = "/saveOrganizationData")
-	public ResponseEntity<OrganizationData> addOrganization(@RequestBody OrganizationDataRequest request) {
-		
+	public ResponseEntity<SaveOrganizationResponse> addOrganization(@RequestBody OrganizationDataRequest request) {
+
 		// Add validation logic here.
-		OrganizationData response = organizationDataService.addOrganizationData(request);
-		
+		SaveOrganizationResponse response = organizationDataService.addOrganizationData(request);
+
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
-		
+
 	}
-	
+
 	@GetMapping(value = "/getOrganization/{organizationId}")
-	public ResponseEntity<OrganizationData> getOrganization(@PathVariable("organizationId") String organizationId) {
-		
+	public ResponseEntity<GetOrganizationResponse> getOrganization(
+			@PathVariable("organizationId") String organizationId) throws GroupException {
+
 		// Add validation logic here.
 		OrganizationDataRequest request = new OrganizationDataRequest();
 		request.setOrganizationId(Long.parseLong(organizationId));
-		OrganizationData response = organizationDataService.getOrganizationData(request);
-		
+		GetOrganizationResponse response = organizationDataService.getOrganizationData(request);
+
 		return ResponseEntity.ok(response);
-		
+
 	}
 
 	@DeleteMapping(value = "/deleteOrganization")
-	public ResponseEntity<String> deleteOrganization(@RequestBody OrganizationDataRequest request) {
-		
+	public ResponseEntity<DeleteOrganizationResponse> deleteOrganization(@RequestBody OrganizationDataRequest request) {
+
 		// Add validation logic here.
-		organizationDataService.deleteOrganizationData(request);
-		
-		return ResponseEntity.ok(deletedSuccessMessage);
-		
+		DeleteOrganizationResponse response = organizationDataService.deleteOrganizationData(request);
+
+		return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
+
 	}
-	
-	@GetMapping(value = "/getAllOrganization")
-	public ResponseEntity<Iterable<OrganizationData>> getAllOrganizations() {
-		return ResponseEntity.ok(organizationDataService.getAllOrganizations());
+
+	@GetMapping(value = "/getAllOrganizations")
+	public ResponseEntity<GetAllOrganizationResponse> getAllOrganizations() {
+		
+		GetAllOrganizationResponse response = organizationDataService.getAllOrganizations();
+		
+		return ResponseEntity.ok(response);
+		
 	}
 }

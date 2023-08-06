@@ -15,17 +15,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.sk.group.ms.organization.constants.OrganizationServiceConstants;
 import com.sk.group.ms.organization.repository.OrganizationDataRespository;
 import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.ms.organization.service.OrganizationDataService;
 import com.sk.group.shared.entity.OrganizationData;
-import com.sk.group.shared.implementation.exception.GroupErrorCodes;
 import com.sk.group.shared.implementation.exception.GroupException;
-import com.sk.group.shared.implementation.response.organization.DeleteOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.GetAllOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.GetAllOrganizationResponse.Organization;
-import com.sk.group.shared.implementation.response.organization.GetOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.SaveOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.DeleteOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetAllOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetAllOrganizationResponse.Organization;
+import com.sk.group.shared.implementation.organization.response.GetOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.SaveOrganizationResponse;
 
 /**
  * @author - Shreyans Khobare
@@ -56,7 +56,7 @@ public class OrganizationDataServiceImpl implements OrganizationDataService {
 	@Override
 	public SaveOrganizationResponse addOrganizationData(OrganizationDataRequest request) {
 
-		OrganizationData organizationData = OrganizationData.builder().organizationName(request.getOrganizationName())
+		OrganizationData organizationData = OrganizationData.builder().organizationName(request.getOrganizationName().trim())
 				.build();
 		organizationData = repository.save(organizationData);
 
@@ -88,7 +88,7 @@ public class OrganizationDataServiceImpl implements OrganizationDataService {
 			// NO ROWS Returned will also be thrown as an exception
 			LOGGER.error(
 					"Exception occured while trying to fetch entries from ORGANIZATION table for OrganizationId: " + request.getOrganizationId(), e);
-			throw new GroupException(HttpStatus.NOT_FOUND, GroupErrorCodes.ORGANIZATION_NOT_FOUND,
+			throw new GroupException(HttpStatus.NOT_FOUND, OrganizationServiceConstants.ORGANIZATION_NOT_FOUND,
 					messageOrganizationNotFound + request.getOrganizationId());
 			
 		}

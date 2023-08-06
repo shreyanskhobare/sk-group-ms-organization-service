@@ -7,10 +7,10 @@ package com.sk.group.ms.organization.service;
 import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.shared.entity.OrganizationData;
 import com.sk.group.shared.implementation.exception.GroupException;
-import com.sk.group.shared.implementation.response.organization.DeleteOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.GetAllOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.GetOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.SaveOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.DeleteOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetAllOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.SaveOrganizationResponse;
 
 /**
 @author - Shreyans Khobare

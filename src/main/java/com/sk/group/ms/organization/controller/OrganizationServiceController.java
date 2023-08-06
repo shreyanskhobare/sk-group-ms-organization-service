@@ -4,6 +4,12 @@ Proof of concept for Code Template
 */
 package com.sk.group.ms.organization.controller;
 
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_BASE_MAPPING;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_DELETE_ORGANIZATION;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ALL_ORGANIZATIONS;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ORGANIZATION;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_SAVE_ORGANIZATION;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
@@ -18,35 +24,38 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.ms.organization.service.OrganizationDataService;
-import com.sk.group.shared.entity.OrganizationData;
+import com.sk.group.ms.organization.validator.OrganizationServiceValidator;
 import com.sk.group.shared.implementation.exception.GroupException;
-import com.sk.group.shared.implementation.response.organization.DeleteOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.GetAllOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.GetOrganizationResponse;
-import com.sk.group.shared.implementation.response.organization.SaveOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.DeleteOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetAllOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.SaveOrganizationResponse;
 
 /**
  * @author - Shreyans Khobare
  */
 @RefreshScope
 @RestController
-@RequestMapping("api/organization-service")
+@RequestMapping(ORGANIZATION_SERVICE_BASE_MAPPING)
 public class OrganizationServiceController {
 
 	@Autowired
 	private OrganizationDataService organizationDataService;
+	
+	@Autowired
+	private OrganizationServiceValidator requestValidator;
 
-	@PostMapping(value = "/saveOrganizationData")
-	public ResponseEntity<SaveOrganizationResponse> addOrganization(@RequestBody OrganizationDataRequest request) {
+	@PostMapping(value = ORGANIZATION_SERVICE_SAVE_ORGANIZATION)
+	public ResponseEntity<SaveOrganizationResponse> addOrganization(@RequestBody OrganizationDataRequest request) throws GroupException {
 
-		// Add validation logic here.
+		requestValidator.validateSaveOrganizationData(request);
 		SaveOrganizationResponse response = organizationDataService.addOrganizationData(request);
 
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 
 	}
 
-	@GetMapping(value = "/getOrganization/{organizationId}")
+	@GetMapping(value = ORGANIZATION_SERVICE_GET_ORGANIZATION)
 	public ResponseEntity<GetOrganizationResponse> getOrganization(
 			@PathVariable("organizationId") String organizationId) throws GroupException {
 
@@ -59,17 +68,17 @@ public class OrganizationServiceController {
 
 	}
 
-	@DeleteMapping(value = "/deleteOrganization")
-	public ResponseEntity<DeleteOrganizationResponse> deleteOrganization(@RequestBody OrganizationDataRequest request) {
+	@DeleteMapping(value = ORGANIZATION_SERVICE_DELETE_ORGANIZATION)
+	public ResponseEntity<DeleteOrganizationResponse> deleteOrganization(@RequestBody OrganizationDataRequest request) throws GroupException {
 
-		// Add validation logic here.
+		requestValidator.validateDeleteOrganization(request);
 		DeleteOrganizationResponse response = organizationDataService.deleteOrganizationData(request);
 
 		return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
 
 	}
 
-	@GetMapping(value = "/getAllOrganizations")
+	@GetMapping(value = ORGANIZATION_SERVICE_GET_ALL_ORGANIZATIONS)
 	public ResponseEntity<GetAllOrganizationResponse> getAllOrganizations() {
 		
 		GetAllOrganizationResponse response = organizationDataService.getAllOrganizations();

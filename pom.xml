@@ -12,7 +12,7 @@
 
 	<groupId>com</groupId>
 	<artifactId>sk-group-ms-organization-service</artifactId>
-	<version>1.0</version>
+	<version>1.1</version>
 	<name>sk-group-ms-organization-service</name>
 	<description>MS for managing Organization level data</description>
 
@@ -71,6 +71,14 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
 
 		<!-- Has to be manually added since our shared jars are not on central
 		Repo -->
@@ -78,6 +86,11 @@
 			<groupId>com</groupId>
 			<artifactId>sk-group-shared-entity</artifactId>
 			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com</groupId>
+			<artifactId>sk-group-shared-implementation</artifactId>
+			<version>1.2</version>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>

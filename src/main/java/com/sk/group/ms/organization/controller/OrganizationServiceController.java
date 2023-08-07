@@ -4,8 +4,14 @@ Proof of concept for Code Template
 */
 package com.sk.group.ms.organization.controller;
 
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_BASE_MAPPING;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_DELETE_ORGANIZATION;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ALL_ORGANIZATIONS;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ORGANIZATION;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ORGANIZATION_EMPLOYEES;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_SAVE_ORGANIZATION;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,58 +23,79 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.ms.organization.service.OrganizationDataService;
-import com.sk.group.shared.entity.OrganizationData;
+import com.sk.group.ms.organization.validator.OrganizationServiceValidator;
+import com.sk.group.shared.implementation.exception.GroupException;
+import com.sk.group.shared.implementation.organization.request.OrganizationDataRequest;
+import com.sk.group.shared.implementation.organization.response.DeleteOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetAllOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetOrganizationEmployeesResponse;
+import com.sk.group.shared.implementation.organization.response.GetOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.SaveOrganizationResponse;
 
 /**
  * @author - Shreyans Khobare
  */
 @RefreshScope
 @RestController
-@RequestMapping("api/organization-service")
+@RequestMapping(ORGANIZATION_SERVICE_BASE_MAPPING)
 public class OrganizationServiceController {
-	
-	@Value("${organization.delete.success.message}")
-	private String deletedSuccessMessage; 
 
 	@Autowired
 	private OrganizationDataService organizationDataService;
 	
-	@PostMapping(value = "/saveOrganizationData")
-	public ResponseEntity<OrganizationData> addOrganization(@RequestBody OrganizationDataRequest request) {
-		
-		// Add validation logic here.
-		OrganizationData response = organizationDataService.addOrganizationData(request);
-		
+	@Autowired
+	private OrganizationServiceValidator requestValidator;
+
+	@PostMapping(value = ORGANIZATION_SERVICE_SAVE_ORGANIZATION)
+	public ResponseEntity<SaveOrganizationResponse> addOrganization(@RequestBody OrganizationDataRequest request) throws GroupException {
+
+		requestValidator.validateSaveOrganizationData(request);
+		SaveOrganizationResponse response = organizationDataService.addOrganizationData(request);
+
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
-		
+
 	}
-	
-	@GetMapping(value = "/getOrganization/{organizationId}")
-	public ResponseEntity<OrganizationData> getOrganization(@PathVariable("organizationId") String organizationId) {
-		
+
+	@GetMapping(value = ORGANIZATION_SERVICE_GET_ORGANIZATION)
+	public ResponseEntity<GetOrganizationResponse> getOrganization(
+			@PathVariable("organizationId") String organizationId) throws GroupException {
+
 		// Add validation logic here.
 		OrganizationDataRequest request = new OrganizationDataRequest();
 		request.setOrganizationId(Long.parseLong(organizationId));
-		OrganizationData response = organizationDataService.getOrganizationData(request);
+		GetOrganizationResponse response = organizationDataService.getOrganizationData(request);
+
+		return ResponseEntity.ok(response);
+
+	}
+
+	@DeleteMapping(value = ORGANIZATION_SERVICE_DELETE_ORGANIZATION)
+	public ResponseEntity<DeleteOrganizationResponse> deleteOrganization(@RequestBody OrganizationDataRequest request) throws GroupException {
+
+		requestValidator.validateDeleteOrganization(request);
+		DeleteOrganizationResponse response = organizationDataService.deleteOrganizationData(request);
+
+		return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
+
+	}
+
+	@GetMapping(value = ORGANIZATION_SERVICE_GET_ALL_ORGANIZATIONS)
+	public ResponseEntity<GetAllOrganizationResponse> getAllOrganizations() {
+		
+		GetAllOrganizationResponse response = organizationDataService.getAllOrganizations();
 		
 		return ResponseEntity.ok(response);
 		
 	}
-
-	@DeleteMapping(value = "/deleteOrganization")
-	public ResponseEntity<String> deleteOrganization(@RequestBody OrganizationDataRequest request) {
-		
-		// Add validation logic here.
-		organizationDataService.deleteOrganizationData(request);
-		
-		return ResponseEntity.ok(deletedSuccessMessage);
-		
-	}
 	
-	@GetMapping(value = "/getAllOrganization")
-	public ResponseEntity<Iterable<OrganizationData>> getAllOrganizations() {
-		return ResponseEntity.ok(organizationDataService.getAllOrganizations());
+	@GetMapping(value = ORGANIZATION_SERVICE_GET_ORGANIZATION_EMPLOYEES)
+	public ResponseEntity<GetOrganizationEmployeesResponse> getOrganizationEmployees(@RequestBody OrganizationDataRequest request) throws GroupException {
+		
+		requestValidator.validateGetOrganizationEmployees(request);
+		GetOrganizationEmployeesResponse response = organizationDataService.getOrganizationEmployees(request);
+		
+		return ResponseEntity.ok(response);
+		
 	}
 }

@@ -8,6 +8,7 @@ import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGA
 import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_DELETE_ORGANIZATION;
 import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ALL_ORGANIZATIONS;
 import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ORGANIZATION;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ORGANIZATION_EMPLOYEES;
 import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_SAVE_ORGANIZATION;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.ms.organization.service.OrganizationDataService;
 import com.sk.group.ms.organization.validator.OrganizationServiceValidator;
 import com.sk.group.shared.implementation.exception.GroupException;
+import com.sk.group.shared.implementation.organization.request.OrganizationDataRequest;
 import com.sk.group.shared.implementation.organization.response.DeleteOrganizationResponse;
 import com.sk.group.shared.implementation.organization.response.GetAllOrganizationResponse;
+import com.sk.group.shared.implementation.organization.response.GetOrganizationEmployeesResponse;
 import com.sk.group.shared.implementation.organization.response.GetOrganizationResponse;
 import com.sk.group.shared.implementation.organization.response.SaveOrganizationResponse;
 
@@ -82,6 +84,16 @@ public class OrganizationServiceController {
 	public ResponseEntity<GetAllOrganizationResponse> getAllOrganizations() {
 		
 		GetAllOrganizationResponse response = organizationDataService.getAllOrganizations();
+		
+		return ResponseEntity.ok(response);
+		
+	}
+	
+	@GetMapping(value = ORGANIZATION_SERVICE_GET_ORGANIZATION_EMPLOYEES)
+	public ResponseEntity<GetOrganizationEmployeesResponse> getOrganizationEmployees(@RequestBody OrganizationDataRequest request) throws GroupException {
+		
+		requestValidator.validateGetOrganizationEmployees(request);
+		GetOrganizationEmployeesResponse response = organizationDataService.getOrganizationEmployees(request);
 		
 		return ResponseEntity.ok(response);
 		

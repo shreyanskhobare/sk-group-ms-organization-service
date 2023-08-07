@@ -14,16 +14,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sk.group.ms.organization.constants.OrganizationServiceConstants;
 import com.sk.group.ms.organization.repository.OrganizationDataRespository;
-import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.ms.organization.service.OrganizationDataService;
 import com.sk.group.shared.entity.OrganizationData;
+import com.sk.group.shared.implementation.employee.request.FilterEmployeesRequest;
+import com.sk.group.shared.implementation.employee.response.FilterEmployeesResponse;
 import com.sk.group.shared.implementation.exception.GroupException;
+import com.sk.group.shared.implementation.feign.EmployeeServiceFeignClient;
+import com.sk.group.shared.implementation.organization.request.OrganizationDataRequest;
 import com.sk.group.shared.implementation.organization.response.DeleteOrganizationResponse;
 import com.sk.group.shared.implementation.organization.response.GetAllOrganizationResponse;
 import com.sk.group.shared.implementation.organization.response.GetAllOrganizationResponse.Organization;
+import com.sk.group.shared.implementation.organization.response.GetOrganizationEmployeesResponse;
 import com.sk.group.shared.implementation.organization.response.GetOrganizationResponse;
 import com.sk.group.shared.implementation.organization.response.SaveOrganizationResponse;
 
@@ -43,9 +48,15 @@ public class OrganizationDataServiceImpl implements OrganizationDataService {
 
 	@Value("${message.organization.delete.success:Organization delete successful}")
 	private String deletedSuccessMessage;
+	
+	@Value("${message.organization.employee.not.found:No employees found for organization}")
+	private String noEmployeeFound;
 
 	@Autowired
 	private OrganizationDataRespository repository;
+	
+	@Autowired
+	private EmployeeServiceFeignClient employeeServiceFeignClient;
 
 	/**
 	 * In this method, we are adding a new entry in ORGANIZATION_DATA table.
@@ -110,7 +121,7 @@ public class OrganizationDataServiceImpl implements OrganizationDataService {
 	@Override
 	public DeleteOrganizationResponse deleteOrganizationData(OrganizationDataRequest request) {
 
-		repository.deleteAllById(request.getDeleteRequests());
+		repository.deleteAllById(request.getOrganizationIdList());
 		DeleteOrganizationResponse response = new DeleteOrganizationResponse();
 		response.setSuccessMessage(deletedSuccessMessage);
 		return response;
@@ -122,6 +133,7 @@ public class OrganizationDataServiceImpl implements OrganizationDataService {
 	 * 
 	 * @return
 	 */
+	@Override
 	public GetAllOrganizationResponse getAllOrganizations() {
 
 		Iterable<OrganizationData> organizationList = repository.findAll();
@@ -150,6 +162,39 @@ public class OrganizationDataServiceImpl implements OrganizationDataService {
 
 		return response;
 
+	}
+	
+	/**
+	 * In this method, we call the '/filterEmployee' endpoint of Employee Service in order to fetch employees beloning to selected organizationIds
+	 * @param request
+	 * @return
+	 * @throws GroupException
+	 */
+	public GetOrganizationEmployeesResponse getOrganizationEmployees(OrganizationDataRequest request) throws GroupException {
+		
+		FilterEmployeesRequest employeeRequest = new FilterEmployeesRequest();
+		employeeRequest.setOrganizationId(request.getOrganizationIdList());
+		employeeRequest.setEmploymentActive(true);
+		employeeRequest.setReturnEmployeePersonalInfo(false);
+		
+		FilterEmployeesResponse employeeResponse = employeeServiceFeignClient.filterEmployees(employeeRequest);
+		
+		if (null == employeeResponse || CollectionUtils.isEmpty(employeeResponse.getEmployeeList())) {
+			
+			LOGGER.info("Received no employees in response for organizationId(s): " + request.getOrganizationIdList());
+			throw new GroupException(HttpStatus.NOT_FOUND, null, noEmployeeFound);
+			
+		} else {
+			
+			LOGGER.info("Received [" + employeeResponse.getEmployeeList().size()
+					+ "] employees in response for organizationId(s): " + request.getOrganizationIdList());
+		
+			GetOrganizationEmployeesResponse response = new GetOrganizationEmployeesResponse();
+			response.setEmployeeList(employeeResponse.getEmployeeList());
+			return response;
+			
+		}
+		
 	}
 
 }

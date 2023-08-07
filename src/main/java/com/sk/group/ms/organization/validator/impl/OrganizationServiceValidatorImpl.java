@@ -6,6 +6,7 @@ package com.sk.group.ms.organization.validator.impl;
 
 import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_DELETE_ORGANIZATION;
 import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_SAVE_ORGANIZATION;
+import static com.sk.group.shared.implementation.feign.FeignClientConstants.ORGANIZATION_SERVICE_GET_ORGANIZATION_EMPLOYEES;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.sk.group.ms.organization.request.OrganizationDataRequest;
 import com.sk.group.ms.organization.validator.OrganizationServiceValidator;
 import com.sk.group.shared.implementation.exception.ControllerRequestValidationFailureException;
 import com.sk.group.shared.implementation.exception.GroupErrorCodes;
+import com.sk.group.shared.implementation.organization.request.OrganizationDataRequest;
 
 import io.micrometer.common.util.StringUtils;
 
@@ -64,11 +65,31 @@ public class OrganizationServiceValidatorImpl implements OrganizationServiceVali
 	public void validateDeleteOrganization(OrganizationDataRequest request)
 			throws ControllerRequestValidationFailureException {
 
-		if (null == request || (StringUtils.isBlank(request.getOrganizationName())
-				&& CollectionUtils.isEmpty(request.getDeleteRequests()) && null == request.getOrganizationId())) {
+		if (null == request) {
 			requestClassEmpty(ORGANIZATION_SERVICE_DELETE_ORGANIZATION);
 		}
+		
+		if (CollectionUtils.isEmpty(request.getOrganizationIdList())) {
+			missingParameterException("organizationIdList", ORGANIZATION_SERVICE_DELETE_ORGANIZATION);
+		}
 
+	}
+	
+	/**
+	 * In this method, we validate the request parameters of '/getOrganizationEmployees' endpoint
+	 * @param request
+	 * @throws ControllerRequestValidationFailureException
+	 */
+	public void validateGetOrganizationEmployees(OrganizationDataRequest request) throws ControllerRequestValidationFailureException {
+		
+		if (null == request) {
+			requestClassEmpty(ORGANIZATION_SERVICE_GET_ORGANIZATION_EMPLOYEES);
+		}
+		
+		if (CollectionUtils.isEmpty(request.getOrganizationIdList())) {
+			missingParameterException("organizationIdList", ORGANIZATION_SERVICE_GET_ORGANIZATION_EMPLOYEES);
+		}
+		
 	}
 
 	/**
